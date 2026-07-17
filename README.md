@@ -4,7 +4,7 @@ Aplicación desarrollada en **Python + Streamlit** para facilitar la búsqueda d
 
 ## 🚀 Demo
 
-https://TU-APP.streamlit.app
+https://explorador-compra-agil-2kmvfenrmtigp3nsn75x5c.streamlit.app/
 
 ## ✨ Funcionalidades
 
