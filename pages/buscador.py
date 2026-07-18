@@ -114,26 +114,41 @@ if st.button("Buscar"):
 
 # Si ya existen datos guardados en la sesion , los mostramos y habilitamos la exportacion
 if st.session_state.datos_busqueda is not None:
-    # Mostramos tabla 
-    st.dataframe(st.session_state.datos_busqueda, hide_index=True,
-                 width="stretch", column_config={
-                     "Ofertas": st.column_config.LinkColumn(
-                         "Ofertas",
-                         display_text="🔗 Revisar"
-                     ),
-                     "Presupuesto": st.column_config.NumberColumn(
-                         "Presupuesto",
-                         format="$%d"
-                     )
-                 })
-
     # Convertimos a DataFrame
     df = pd.DataFrame(st.session_state.datos_busqueda)
 
-    # Crear buffer para almacenar el excel en memoria
+    # Convertimos la fecha desde texto a datetime real
+    df["Fecha de cierre"] = pd.to_datetime(
+        df["Fecha de cierre"],
+        format="%d-%m-%Y %H:%M",
+        errors="coerce"
+    )
+
+    # Mostramos tabla
+    st.dataframe(
+        df,
+        hide_index=True,
+        width="stretch",
+        column_config={
+            "Ofertas": st.column_config.LinkColumn(
+                "Ofertas",
+                display_text="🔗 Revisar"
+            ),
+            "Presupuesto": st.column_config.NumberColumn(
+                "Presupuesto",
+                format="$%d"
+            ),
+            "Fecha de cierre": st.column_config.DatetimeColumn(
+                "Fecha de cierre",
+                format="DD-MM-YYYY HH:mm"
+            )
+        }
+    )
+
+    # Crear buffer para almacenar el Excel en memoria
     buffer = io.BytesIO()
 
-    # Escribe el excel dentro de el buffer
+    # Escribe el Excel dentro del buffer
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
         df.to_excel(writer, index=False, sheet_name="Informe")
         ws = writer.sheets["Informe"]
@@ -141,7 +156,6 @@ if st.session_state.datos_busqueda is not None:
 
     nombre_archivo = f"reporte_{datetime.now():%Y%m%d_%H%M%S}.xlsx"
 
-    # Boton para exportar
     st.download_button(
         label="Descargar Excel",
         data=buffer.getvalue(),
