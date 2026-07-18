@@ -1,6 +1,6 @@
 # para solicitud
 import requests
-from config import BASE_URL, HEADERS
+from src.config import BASE_URL, HEADERS
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, date
 

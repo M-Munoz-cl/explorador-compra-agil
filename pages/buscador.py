@@ -1,9 +1,9 @@
 # importar streamlit
 import streamlit as st
 # importamos la funcion obtener datos de nuestro api.py
-from api import obtener_datos
+from src.api import obtener_datos
 from datetime import datetime, date, timedelta
-from formato_excel import dar_formato
+from src.formato_excel import dar_formato
 import pandas as pd
 import io
 
@@ -35,7 +35,7 @@ else:
     fecha_fin = None
 
 # equivalente a un h1 de html (cada vez que se abra la pagina se vera ese titulo)
-st.title("Buscador de Compra Agil")
+st.title("Buscador de Compras Ágiles")
 
 # Inicializar el Session State para guardar los datos entre clics
 if "datos_busqueda" not in st.session_state:
