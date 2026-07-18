@@ -88,13 +88,13 @@ if st.button("Buscar"):
         
         oportunidades = obtener_datos(region, llamado, fecha_inicio, fecha_fin)
 
-        if not oportunidades:
-            st.warning(
-                "No fue posible obtener datos de Mercado Público. "
-                "Intenta nuevamente en unos minutos."
-            )
-
-    st.success(f"Se encontraron {len(oportunidades)} oportunidades")
+    if not oportunidades:
+        st.warning(
+            "No fue posible obtener datos de Mercado Público. "
+            "Intenta nuevamente en unos minutos."
+        )
+    else:
+        st.success(f"Se encontraron {len(oportunidades)} oportunidades")
 
     datos = []
 
@@ -104,7 +104,7 @@ if st.button("Buscar"):
             {"Codigo": item["codigo"],
              "Nombre": item["nombre"],
              "Organismo": item["institucion"]["organismo_comprador"],
-             "Presupuesto": f"${item['montos']['monto_disponible_clp']:,.0f}".replace(",", "."),
+             "Presupuesto": item['montos']['monto_disponible_clp'],
              "Fecha de cierre": item["fecha_cierre_mostrar"],
              "Ofertas": f"https://buscador.mercadopublico.cl/ficha?code={item['codigo']}"}
         )
@@ -120,6 +120,10 @@ if st.session_state.datos_busqueda is not None:
                      "Ofertas": st.column_config.LinkColumn(
                          "Ofertas",
                          display_text="🔗 Revisar"
+                     ),
+                     "Presupuesto": st.column_config.NumberColumn(
+                         "Presupuesto",
+                         format="$%d"
                      )
                  })
 

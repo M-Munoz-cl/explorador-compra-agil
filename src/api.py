@@ -2,7 +2,23 @@
 import requests
 from config import BASE_URL, HEADERS
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, date
+
+TTL_POR_DEFECTO_DIAS = 7
+TTL_MAXIMO_DIAS = 365
+
+def calcular_ttl(fecha_inicio):
+    # La API solo permite buscar hacia atrás mediante ttl_cambio_ms.
+    # Calculamos el TTL desde hoy hasta la fecha de inicio para asegurar
+    # que el rango solicitado quede completamente cubierto.
+    if fecha_inicio is None:
+        dias = TTL_POR_DEFECTO_DIAS
+    else:
+        dias = (date.today() - fecha_inicio).days + 1
+    
+    dias = max(1,min(dias, TTL_MAXIMO_DIAS))
+
+    return dias * 24 * 60 * 60 * 1000
 
 PALABRAS_EXCLUIDAS = [
     "servicio",
@@ -19,12 +35,12 @@ PALABRAS_EXCLUIDAS = [
     "medicamento"
 ]
 
-def obtener_pagina(region, numero_pagina):
+def obtener_pagina(region, numero_pagina, ttl_cambio_ms):
     response = requests.get(
         f"{BASE_URL}/v2/compra-agil",
         headers=HEADERS,
         params={
-            "ttl_cambio_ms": 2592000000,
+            "ttl_cambio_ms": ttl_cambio_ms,
             "tamano_pagina": 20,
             "numero_pagina": numero_pagina,
             "estado": "publicada",
@@ -51,7 +67,9 @@ def obtener_pagina(region, numero_pagina):
 def obtener_datos(region, llamado, fecha_inicio, fecha_fin):
     compras_filtradas = []
 
-    items, paginacion = obtener_pagina(region, 1)
+    ttl_cambio_ms = calcular_ttl(fecha_inicio)
+
+    items, paginacion = obtener_pagina(region, 1, ttl_cambio_ms)
 
     if not paginacion:
         return []
@@ -66,7 +84,8 @@ def obtener_datos(region, llamado, fecha_inicio, fecha_fin):
         resultados = executor.map(
             obtener_pagina,
             [region] * (total_paginas - 1),
-            range(2, total_paginas + 1)
+            range(2, total_paginas + 1),
+            [ttl_cambio_ms] * (total_paginas - 1)
         )
 
         for items_pagina, paginacion in resultados:

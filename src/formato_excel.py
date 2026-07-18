@@ -58,6 +58,12 @@ def dar_formato(ws):
             f"A2:F{ws.max_row}",
             regla
         )
+    
+    # Formato moneda para la columna presupuesto
+
+    if ws.max_row > 1:
+        for fila in range(2, ws.max_row + 1):
+            ws[f"D{fila}"].number_format = '$#,##0'
 
     # Hipervinculos
     # iteramos la columna que tiene los link desde la fila 2 hasta la ultima (esto ya que la 1 son los encabezados) solo si hay valores
