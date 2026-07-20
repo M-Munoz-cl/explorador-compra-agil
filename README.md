@@ -8,7 +8,7 @@ Actualmente integra un buscador de oportunidades mediante la API oficial y un ge
 
 ## Demo
 
-https://explorador-compra-agil-2kmvfenrmtigp3nsn75x5c.streamlit.app/
+https://explorador-compra-agil-v2.streamlit.app/
 
 ---
 
