@@ -4,6 +4,7 @@ import streamlit as st
 from src.api import obtener_datos
 from datetime import datetime, date, timedelta
 from src.formato_excel import dar_formato
+from st_keyup import st_keyup
 import pandas as pd
 import io
 
@@ -124,9 +125,36 @@ if st.session_state.datos_busqueda is not None:
         errors="coerce"
     )
 
+    # Filtro local
+    palabra_busqueda = st_keyup(
+        "Filtrar resultados por nombre",
+        placeholder="Ej: silla, notebook, pintura...",
+        debounce=300,
+        key="filtro_nombre"
+    )
+
+    # Copia para no modificar resultados originales
+    df_filtrado = df.copy()
+
+    if palabra_busqueda and palabra_busqueda.strip():
+        df_filtrado = df_filtrado[
+                df_filtrado["Nombre"]
+                .fillna("")
+                .str.contains(
+                    palabra_busqueda.strip(),
+                    case=False,
+                    na=False,
+                    regex=False
+                )
+        ]
+
+    st.caption(
+        f"Mostrando {len(df_filtrado)} de {len(df)} oportunidades"
+    )
+
     # Mostramos tabla
     st.dataframe(
-        df,
+        df_filtrado,
         hide_index=True,
         width="stretch",
         column_config={
@@ -150,7 +178,7 @@ if st.session_state.datos_busqueda is not None:
 
     # Escribe el Excel dentro del buffer
     with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="Informe")
+        df_filtrado.to_excel(writer, index=False, sheet_name="Informe")
         ws = writer.sheets["Informe"]
         dar_formato(ws)
 
